@@ -1,0 +1,79 @@
+# Test Results
+
+1. select invoices
+2. convert to images
+3. create public repository
+4. list links
+5. select base docker
+6. spin pod
+7. start/download model
+8. python script
+9. for each image
+10. output to file
+
+## Attempt 1
+
+- NVIDIA A40 24gb
+- vllm-latest
+  - --host 0.0.0.0 --port 8000 --served-model-name Qwen2-VL-7B-Instruct --model Qwen/Qwen2-VL-7B-Instruct --dtype float16
+  - HF_TOKEN
+
+
+```
+2024-10-30T00:43:01.375220640Z INFO 10-29 17:43:01 model_runner.py:1056] Starting to load model Qwen/Qwen2-VL-7B-Instruct...
+...
+2024-10-30T00:43:47.772709381Z INFO 10-29 17:43:47 model_runner.py:1067] Loading model weights took 15.5083 GB
+2024-10-30T00:44:02.353929725Z INFO 10-29 17:44:02 gpu_executor.py:122] # GPU blocks: 18631, # CPU blocks: 4681
+2024-10-30T00:44:02.353953195Z INFO 10-29 17:44:02 gpu_executor.py:126] Maximum concurrency for 32768 tokens per request: 9.10x
+2024-10-30T00:44:05.607081646Z INFO 10-29 17:44:05 model_runner.py:1395] Capturing the model for CUDA graphs. This may lead to unexpected consequences if the model is not static. To run the model in eager mode, set 'enforce_eager=True' or use '--enforce-eager' in the CLI.
+2024-10-30T00:44:05.607130994Z INFO 10-29 17:44:05 model_runner.py:1399] CUDA graphs can take additional 1~3 GiB memory per GPU. If you are running out of memory, consider decreasing `gpu_memory_utilization` or enforcing eager mode. You can also reduce the `max_num_seqs` as needed to decrease memory usage.
+```
+
+Temperature was set to 0.3 down from 0.7. When tested at 0.1, results would time out.
+
+N8N was able to connect to the runpod.
+
+- Using the pod url.
+- Token set to "EMPTY"
+
+
+curl http://localhost:8000/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -d '{
+    "model": "Qwen2-VL-7B-Instruct",
+    "messages": [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": [
+        {"type": "image_url", "image_url": {"url": "https://modelscope.oss-cn-beijing.aliyuncs.com/resource/qwen.png"}},
+        {"type": "text", "text": "What is the text in the illustrate?"}
+    ]}
+    ]
+    }'
+
+
+    curl https://gxpcjso7by7twi-8000.proxy.runpod.net/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -d '{
+    "model": "Qwen2-VL-7B-Instruct",
+    "messages": [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": [
+        {"type": "image_url", "image_url": {"url": "https://raw.githubusercontent.com/my-opencode/runpod-tests/refs/heads/master/testfiles/receipts-zh/%E5%8F%91%E7%A5%A8%EF%BC%91%EF%BC%96%EF%BC%8D%E7%94%B5%E8%84%91_1.png"}},
+        {"type": "text", "text": "What are the total amount to pay and the total tax amount?"}
+    ]}
+    ]
+    }'
+
+
+    curl https://gxpcjso7by7twi-8000.proxy.runpod.net/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -d '{
+    "model": "Qwen2-VL-7B-Instruct",
+    "messages": [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": [
+        {"type": "image_url", "image_url": {"url": "https://raw.githubusercontent.com/my-opencode/runpod-tests/refs/heads/master/testfiles/receipts-zh/%E5%8F%91%E7%A5%A8%EF%BC%91%EF%BC%96%EF%BC%8D%E7%94%B5%E8%84%91_1.png"}},
+        {"type": "text", "text": "What is the date of the document?"}
+    ]}
+    ]
+    }'
